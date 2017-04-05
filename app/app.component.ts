@@ -8,6 +8,9 @@ import { AppService } from './app.service';
 })
 
 export class AppComponent implements OnInit  {
+  isCardShown: boolean = false;
+  hoveredItem: any;
+
   constructor(private appService: AppService) {}
 
   pricelist: any;
@@ -18,5 +21,18 @@ export class AppComponent implements OnInit  {
     });
   }
 
+  onItemHover(item: any, event: MouseEvent) {
+    this.hoveredItem = {
+      description: item.description_ru,
+      position: {
+        top: event.y,
+        left: event.x,
+      },
+    }
+  }
+
+  onItemBlur() {
+    this.hoveredItem = null;
+  }
 
 }

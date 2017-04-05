@@ -4,12 +4,15 @@
       <h2>SSL pricelist</h2>
       <table *ngIf="pricelist">
         <tbody>
-          <tr *ngFor="let item of pricelist">
-            <td><a>{{ item.name }}</a></td>
-            <td> от {{ item.price.period[0].cost }} {{ item.price.currency }}</td>
+          <tr *ngFor="let item of pricelist" (mouseleave)='onItemBlur()'>
+            <td><a (mouseenter)='onItemHover(item, $event)'>{{ item.name }}</a></td>
+            <td>
+                 от {{ item.price.period[0].cost }} {{ item.price.currency }}
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
 </div>
+<card *ngIf='hoveredItem && hoveredItem.description' [sert]='hoveredItem'></card>
