@@ -1,8 +1,8 @@
-import { Component, Input, OnInit, ElementRef } from '@angular/core'
+import { AfterViewChecked, AfterViewInit, Component, Input, ElementRef, ViewChild } from '@angular/core'
+import * as each from 'lodash/each.js';
 
 export interface sertCard {
   description: string;
-  data? : any;
   position: {
     top: number;
     left: number;
@@ -14,100 +14,57 @@ export interface sertCard {
   templateUrl: 'app/card/card.component.html',
   styleUrls: ['app/card/card.css'],
 })
-export class CardComponent implements OnInit {
+export class CardComponent implements AfterViewInit, AfterViewChecked {
   @Input() sert: sertCard;
+  @ViewChild('card') card: ElementRef;
 
-  constructor(private ref: ElementRef) {}
-
-  parseDescription() {
-    let tmpElement = document.createElement('div');
-    tmpElement.id='root';
-    tmpElement.innerHTML = this.sert.description;
-    let collection = tmpElement.getElementsByTagName('div');
-    return this.parseCollection(collection, tmpElement);
+  ngAfterViewInit() {
+    let nodes = this.card.nativeElement.children;
+    nodes[0].remove();
+    each(nodes, (node: HTMLElement) => {
+      this.colorizeNodes(node);
+    });
   }
 
-  parseCollection(collection: NodeListOf<HTMLDivElement>, root: any) {
-    let newCollection = [];
-    for (let i = 0; i < collection.length; i++) {
-      let element = collection.item(i);
-      let text = element.textContent;
-      if (text !== '__localname__' && element.parentElement.isEqualNode(root)) {
-        newCollection.push({
-          children: this.parseNode(element.childNodes),
-        });
-      }
+  ngAfterViewChecked() {
+    this.countPopupPosition();
+  }
+
+  colorizeNodes(node: any) {
+    let sslNameChild = node.children && node.children.item(0);
+    if (sslNameChild) {
+      sslNameChild.style.color = this.getColor(sslNameChild.innerText);
     }
-    return newCollection;
   }
 
-  parseNode(nodes: NodeList): Array<any> {
-    let result = [];
-    for (let i = 0; i < nodes.length; i++) {
-      if (nodes.item(i).nodeName === '#text') {
-        result.push({
-          text: nodes.item(i).nodeValue,
-        });
-      } else {
-        let text = nodes.item(i).textContent;
-        let style = this.parceStyle(nodes.item(i).attributes);
-        style['color'] = this.parceColor(text) || style['color'];
-        let children = [];
-        if (nodes.item(i).childNodes.length > 1) {
-          children = this.parseNode(nodes.item(i).childNodes);
-        }
-        result.push({
-          text: text,
-          style: style,
-          children: children,
-        });
-      }
+  getColor(text: string): string {
+    switch (text.toLowerCase()) {
+      case '[dv]': return 'orange';
+      case '[wildcard]': return 'purple';
+      case '[idn]': return 'green';
+      case '[ov]': return 'cadetblue';
+      default: return 'maroon';
     }
-    return result;
   }
 
-  parceStyle(map: NamedNodeMap) {
-    let styles = {};
-    let string = map.getNamedItem('style').value || null;
-    if (string) {
-      string.split(';').forEach((style) => {
-        if (style) {
-          const [key, value] = style.replace(/\s/g, '').split(':');
-          styles[key] = value;
-        }
-      });
-    }
-    return styles;
-  }
+  countPopupPosition() {
+    let card = this.card.nativeElement;
+    const height = card.clientHeight;
+    const width = card.clientWidth;
+    const top = this.sert.position.top;
+    const left = this.sert.position.left;
+    const maxY = window.innerHeight;
 
-  parceColor(text: string): string {
-    if (text.toLowerCase() === '[dv]') {
-      return 'orange';
-    } else if (text.toLowerCase() === '[wildcard]') {
-      return 'purple';
-    } else if(text.toLowerCase() === '[idn]') {
-      return 'green';
-    }
-    return;
-  }
-
-  countPOpupPosition() {
-    let maxY = window.innerHeight;
-    let maxX = window.innerWidth;
-    if (this.sert.position.left - 250 < 20) {
-      this.sert.position.left = this.sert.position.left = 20;
+    if (left - width < 20) {
+      card.style.left = 20 + 'px';
     } else {
-      this.sert.position.left = this.sert.position.left - 250
+      card.style.left = left - width + 'px';
     }
-    if (this.sert.position.top + 200 > maxY) {
-      this.sert.position.top = this.sert.position.top - 230;
+    if (top + height > maxY) {
+      card.style.top = top - height - 20 + 'px';
     } else {
-      this.sert.position.top = this.sert.position.top + 20;
+      card.style.top = top + 20 + 'px';
     }
   }
 
-  ngOnInit() {
-    this.countPOpupPosition();
-    this.sert.data = this.parseDescription();
-  }
 }
