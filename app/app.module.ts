@@ -5,11 +5,10 @@ import { HttpModule } from '@angular/http';
 import { AppComponent }  from './app.component';
 import { AppService } from './app.service';
 import { CardComponent } from './card/card.component';
-import { CardRowComponent } from './card/card-row.component';
 
 @NgModule({
   imports:      [ BrowserModule, HttpModule ],
-  declarations: [ AppComponent, CardComponent, CardRowComponent ],
+  declarations: [ AppComponent, CardComponent ],
   providers:    [ AppService ],
   bootstrap:    [ AppComponent ]
 })
